@@ -1,16 +1,36 @@
 const questions = [
-  { question: "What is the capital of France?", choices: ["Paris", "London", "Berlin", "Madrid"], answer: "Paris" },
-  { question: "What is the highest mountain in the world?", choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"], answer: "Everest" },
-  { question: "What is the largest country by area?", choices: ["Russia", "China", "Canada", "United States"], answer: "Russia" },
-  { question: "Which is the largest planet in our solar system?", choices: ["Earth", "Jupiter", "Mars"], answer: "Jupiter" },
-  { question: "What is the capital of Canada?", choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"], answer: "Ottawa" },
+  { 
+    question: "What is the capital of France?", 
+    choices: ["Paris", "London", "Berlin", "Madrid"], 
+    answer: "Paris" 
+  },
+  { 
+    question: "What is the highest mountain in the world?", 
+    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"], 
+    answer: "Everest" 
+  },
+  { 
+    question: "What is the largest country by area?", 
+    choices: ["Russia", "China", "Canada", "United States"], 
+    answer: "Russia" 
+  },
+  { 
+    question: "Which is the largest planet in our solar system?", 
+    choices: ["Earth", "Jupiter", "Mars", "Saturn"],  // Fixed: Added "Saturn" to make 4 choices
+    answer: "Jupiter" 
+  },
+  { 
+    question: "What is the capital of Canada?", 
+    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"], 
+    answer: "Ottawa" 
+  },
 ];
 
 const questionsElement = document.getElementById("questions");
 const scoreElement = document.getElementById("score");
 const submitBtn = document.getElementById("submit");
 
-// Use an ARRAY for progress to satisfy automated test cases
+// Initialize userAnswers from session storage or create new array
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || new Array(questions.length).fill(null);
 
 function renderQuestions() {
@@ -27,23 +47,25 @@ function renderQuestions() {
       radio.type = "radio";
       radio.name = `question-${i}`;
       radio.value = choice;
+      radio.id = `q${i}-${choice}`;
 
-      // Check against array index
+      // Restore checked state from session storage
       if (userAnswers[i] === choice) {
         radio.checked = true;
       }
 
       radio.addEventListener("change", () => {
         userAnswers[i] = choice;
-        // Save the whole array back to session storage
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
 
       const label = document.createElement("label");
+      label.htmlFor = radio.id;
       label.appendChild(radio);
-      label.appendChild(document.createTextNode(choice));
+      label.appendChild(document.createTextNode(` ${choice}`));
       
       questionDiv.appendChild(label);
+      questionDiv.appendChild(document.createElement("br"));
     });
     questionsElement.appendChild(questionDiv);
   });
@@ -57,16 +79,19 @@ submitBtn.addEventListener("click", () => {
     }
   });
 
-  // Display and save
+  // Display score
   const resultText = `Your score is ${score} out of 5.`;
   scoreElement.innerText = resultText;
-  localStorage.setItem("score", score);
+  
+  // Store score in localStorage as string (as required)
+  localStorage.setItem("score", resultText);
 });
 
-// Load score if it exists
+// Load and display previous score on page load
 const savedScore = localStorage.getItem("score");
-if (savedScore !== null) {
-  scoreElement.innerText = `Your score is ${savedScore} out of 5.`;
+if (savedScore) {
+  scoreElement.innerText = savedScore;
 }
 
+// Initial render
 renderQuestions();

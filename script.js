@@ -16,7 +16,7 @@ const questions = [
   },
   { 
     question: "Which is the largest planet in our solar system?", 
-    choices: ["Earth", "Jupiter", "Mars", "Saturn"],  // Fixed: Added "Saturn" to make 4 choices
+    choices: ["Earth", "Jupiter", "Mars", "Saturn"], 
     answer: "Jupiter" 
   },
   { 
@@ -30,8 +30,8 @@ const questionsElement = document.getElementById("questions");
 const scoreElement = document.getElementById("score");
 const submitBtn = document.getElementById("submit");
 
-// Initialize userAnswers from session storage or create new array
-let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || new Array(questions.length).fill(null);
+// Initialize userAnswers from session storage
+let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || Array(questions.length).fill(null);
 
 function renderQuestions() {
   questionsElement.innerHTML = "";
@@ -39,34 +39,33 @@ function renderQuestions() {
   questions.forEach((q, i) => {
     const questionDiv = document.createElement("div");
     const questionText = document.createElement("p");
-    questionText.innerText = q.question;
+    questionText.textContent = q.question;
     questionDiv.appendChild(questionText);
 
     q.choices.forEach((choice) => {
+      const label = document.createElement("label");
       const radio = document.createElement("input");
       radio.type = "radio";
       radio.name = `question-${i}`;
       radio.value = choice;
-      radio.id = `q${i}-${choice}`;
-
-      // Restore checked state from session storage
+      
+      // Check if this answer was previously selected
       if (userAnswers[i] === choice) {
         radio.checked = true;
       }
-
+      
       radio.addEventListener("change", () => {
         userAnswers[i] = choice;
+        // Save progress to session storage
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
-
-      const label = document.createElement("label");
-      label.htmlFor = radio.id;
+      
       label.appendChild(radio);
       label.appendChild(document.createTextNode(` ${choice}`));
-      
       questionDiv.appendChild(label);
       questionDiv.appendChild(document.createElement("br"));
     });
+    
     questionsElement.appendChild(questionDiv);
   });
 }
@@ -81,17 +80,17 @@ submitBtn.addEventListener("click", () => {
 
   // Display score
   const resultText = `Your score is ${score} out of 5.`;
-  scoreElement.innerText = resultText;
+  scoreElement.textContent = resultText;
   
-  // Store score in localStorage as string (as required)
+  // Store score in localStorage
   localStorage.setItem("score", resultText);
 });
 
-// Load and display previous score on page load
+// On page load, check for saved score and display it
 const savedScore = localStorage.getItem("score");
 if (savedScore) {
-  scoreElement.innerText = savedScore;
+  scoreElement.textContent = savedScore;
 }
 
-// Initial render
+// Initialize the quiz
 renderQuestions();

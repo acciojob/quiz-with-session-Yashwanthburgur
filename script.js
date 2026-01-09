@@ -30,7 +30,13 @@ const questionsElement = document.getElementById("questions");
 const scoreElement = document.getElementById("score");
 const submitBtn = document.getElementById("submit");
 
-// Initialize userAnswers from session storage
+// ✅ CRITICAL: Load score FIRST (before renderQuestions)
+const savedScore = localStorage.getItem("score");
+if (savedScore) {
+  scoreElement.textContent = savedScore;
+}
+
+// Load progress
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || Array(questions.length).fill(null);
 
 function renderQuestions() {
@@ -49,14 +55,12 @@ function renderQuestions() {
       radio.name = `question-${i}`;
       radio.value = choice;
       
-      // Check if this answer was previously selected
       if (userAnswers[i] === choice) {
         radio.checked = true;
       }
       
       radio.addEventListener("change", () => {
         userAnswers[i] = choice;
-        // Save progress to session storage
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
       
@@ -78,19 +82,11 @@ submitBtn.addEventListener("click", () => {
     }
   });
 
-  // Display score
   const resultText = `Your score is ${score} out of 5.`;
   scoreElement.textContent = resultText;
   
-  // Store score in localStorage
   localStorage.setItem("score", resultText);
+  sessionStorage.removeItem("progress");  // ✅ Clear progress after submit
 });
 
-// On page load, check for saved score and display it
-const savedScore = localStorage.getItem("score");
-if (savedScore) {
-  scoreElement.textContent = savedScore;
-}
-
-// Initialize the quiz
 renderQuestions();
